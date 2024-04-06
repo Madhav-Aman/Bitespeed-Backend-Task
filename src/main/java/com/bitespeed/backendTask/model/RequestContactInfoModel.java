@@ -3,11 +3,16 @@ package com.bitespeed.backendTask.model;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Pattern;
 
 @Component
 public class RequestContactInfoModel implements Serializable {
 
+
     private String email;
+
+
     private String phoneNumber;
 
     public RequestContactInfoModel(String email, String phoneNumber) {
