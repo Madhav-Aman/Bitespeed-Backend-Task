@@ -22,10 +22,10 @@ public class ResponseService {
 
     public ResponseContactInfoModel getContactInfoViaEmailAndPhoneNumber(String email, String phoneNumber) {
         try {
-            // Log info level message for the start of the method execution
+
             log.info("Fetching contact information for email: {} and phone number: {}", email, phoneNumber);
 
-            // Initialize the response model and lists for email, phone numbers, and secondary IDs
+
             ResponseContactInfoModel response = new ResponseContactInfoModel();
             List<String> emails = new ArrayList<>();
             List<String> phoneNumbers = new ArrayList<>();

@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class IdentificationService {
@@ -41,15 +43,51 @@ public class IdentificationService {
 
                 if (contact == null) {
                     log.info("Contact found for email: {} and phone number: {}", email, phoneNumber);
+
                     List<Contact> fetchedViaEmail = contactRepository.findByEmail(email);
                     log.info("Fetched contacts via email: {}", fetchedViaEmail);
+
                     List<Contact> fetchedViaPhoneNumber = contactRepository.findByPhoneNumber(phoneNumber);
                     log.info("Fetched contacts via phone number: {}", fetchedViaPhoneNumber);
+
                     if (fetchedViaEmail.isEmpty()) {
                         userExistViaPhoneNumber(email, fetchedViaPhoneNumber);
                         return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
-                    } else {
+                    } else if (fetchedViaPhoneNumber.isEmpty()){
                         userExistViaEmail(phoneNumber, fetchedViaEmail);
+                        return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
+                    }
+
+                    else {
+                        Optional<Contact> optionalP1 = fetchedViaEmail.stream()
+                                .filter(c -> "primary".equals(c.getLinkPrecedence()))
+                                .findFirst();
+
+                        Optional<Contact> optionalP2 = fetchedViaPhoneNumber.stream()
+                                .filter(c -> "primary".equals(c.getLinkPrecedence()))
+                                .findFirst();
+
+                        if (optionalP1.isPresent() && optionalP2.isPresent()) {
+                            Contact p1 = optionalP1.get();
+                            Contact p2 = optionalP2.get();
+
+                            Date p1CreatedAt = p1.getCreatedAt();
+                            Date p2CreatedAt = p2.getCreatedAt();
+
+                            // Compare createdAt dates
+                            if (p1CreatedAt.before(p2CreatedAt)) {
+
+                                p2.setLinkedId(p1.getId());
+                                p2.setLinkPrecedence("secondary");
+                                contactRepository.save(p2);
+                            } else {
+
+                                p1.setLinkedId(p2.getId());
+                                p1.setLinkPrecedence("secondary");
+                                contactRepository.save(p1);
+                            }
+                        }
+
                         return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
                     }
                 }
