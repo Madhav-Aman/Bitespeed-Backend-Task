@@ -1,7 +1,6 @@
 package com.bitespeed.backendTask.service.impl;
 
 import com.bitespeed.backendTask.entity.Contact;
-import com.bitespeed.backendTask.model.ResponseContactInfoModel;
 import com.bitespeed.backendTask.repository.ContactRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,17 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class IdentificationOperationServices {
+public class IdentityOperationService {
     Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ContactRepository contactRepository;
 
-    @Autowired
-    private ResponseServices responseServices;
-
-
-    public ResponseContactInfoModel createNewUser(String email , String phoneNumber){
-        log.info(" inside createNewUserMethods : {} : {}",email,phoneNumber);
+    public void createNewUser(String email , String phoneNumber){
+        log.info("Inside createNewUserMethods: {} : {}", email, phoneNumber);
         try{
             Contact newContact = new Contact();
             newContact.setEmail(email);
@@ -28,12 +23,14 @@ public class IdentificationOperationServices {
             newContact.setLinkPrecedence("primary");
 
             contactRepository.save(newContact);
-            log.info("added as new User");
-            return responseServices.getContactInfo(email, phoneNumber);
+            log.info("Added as new User");
+//            return contactRepository.findByEmailOrPhoneNumber(email, phoneNumber);
 
         }catch(Exception e){
-            return null;
+            log.error("An error occurred while creating a new user: {}", e.getMessage(), e);
+//            return null;
         }
-
     }
+
+
 }
