@@ -1,9 +1,9 @@
 package com.bitespeed.backendTask.service.impl;
 
 import com.bitespeed.backendTask.entity.Contact;
-import com.bitespeed.backendTask.model.RequestContactInfoModel;
 import com.bitespeed.backendTask.model.ResponseContactInfoModel;
 import com.bitespeed.backendTask.repository.ContactRepository;
+import com.bitespeed.backendTask.service.ResponseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ResponseService {
+public class ResponseServiceImpl implements ResponseService {
 
-    private final Logger log = LoggerFactory.getLogger(ResponseService.class);
+    private final Logger log = LoggerFactory.getLogger(ResponseServiceImpl.class);
 
     @Autowired
     private ContactRepository contactRepository;
@@ -95,6 +95,7 @@ public class ResponseService {
         try {
             ResponseContactInfoModel response = new ResponseContactInfoModel();
             List<Contact> contacts = contactRepository.findByEmail(email);
+
             if (contacts.isEmpty()) {
 
                 Contact contact = new Contact();
@@ -105,9 +106,10 @@ public class ResponseService {
 
                 return getContactInfoViaEmailAndPhoneNumber(email,"");
 
+            } else if (contacts.size() ==1 ) {
+                Contact c = contacts.get(0);
+                return getContactInfoViaEmailAndPhoneNumber(c.getEmail(),c.getPhoneNumber());
             } else {
-
-
                 List<String> emails = new ArrayList<>();
                 List<String> phoneNumbers = new ArrayList<>();
                 List<Long> secondaryIds = new ArrayList<>();
@@ -145,8 +147,10 @@ public class ResponseService {
                 if (linkedId != null) {
                     primaryContact = contactRepository.findById(linkedId).orElse(null);
                     if (primaryContact != null) {
-                        emails.add(0, primaryContact.getEmail());
-                        phoneNumbers.add(0, primaryContact.getPhoneNumber());
+                        // Populate primary contact information when retrieved via linked ID
+                        emails.add(primaryContact.getEmail());
+                        phoneNumbers.add(primaryContact.getPhoneNumber());
+                        response.setPrimaryContactId(primaryContact.getId()); // Set primary contact ID
                     } else {
                         log.warn("Primary contact with ID {} not found", linkedId);
                     }
@@ -154,13 +158,23 @@ public class ResponseService {
                     log.warn("Linked ID is null, unable to retrieve primary contact details");
                 }
 
-                // Set the lists in the response model
+// Add emails and phone numbers of secondary contacts
+                for (Contact c : contacts) {
+                    if (!c.getId().equals(response.getPrimaryContactId())) { // Exclude primary contact
+                        emails.add(c.getEmail());
+                        phoneNumbers.add(c.getPhoneNumber());
+                        secondaryIds.add(c.getId());
+                    }
+                }
+
+// Set the lists in the response model
                 response.setEmails(emails);
                 response.setPhoneNumbers(phoneNumbers);
                 response.setSecondaryContactIds(secondaryIds);
 
-                // Log debug level message indicating successful completion of contact information fetching
+// Log debug level message indicating successful completion of contact information fetching
                 log.debug("Contact information fetched successfully");
+
                 return response;
             }} catch(Exception e){
                 // Log error level message if an exception occurs during the execution of the method
@@ -185,7 +199,10 @@ public class ResponseService {
 
                 return getContactInfoViaEmailAndPhoneNumber("",phoneNumber);
 
-            } else {
+            } else if (contacts.size() ==1 ) {
+                Contact c = contacts.get(0);
+                return getContactInfoViaEmailAndPhoneNumber(c.getEmail(),c.getPhoneNumber());}
+            else {
                 List<String> emails = new ArrayList<>();
                 List<String> phoneNumbers = new ArrayList<>();
                 List<Long> secondaryIds = new ArrayList<>();

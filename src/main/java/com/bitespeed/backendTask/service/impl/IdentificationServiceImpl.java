@@ -4,6 +4,9 @@ import com.bitespeed.backendTask.entity.Contact;
 import com.bitespeed.backendTask.model.RequestContactInfoModel;
 import com.bitespeed.backendTask.model.ResponseContactInfoModel;
 import com.bitespeed.backendTask.repository.ContactRepository;
+import com.bitespeed.backendTask.service.IdentificationService;
+import com.bitespeed.backendTask.service.IdentityOperationService;
+import com.bitespeed.backendTask.service.ResponseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +17,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class IdentificationService {
+public class IdentificationServiceImpl implements IdentificationService {
 
-    private final Logger log = LoggerFactory.getLogger(IdentificationService.class);
+    private final Logger log = LoggerFactory.getLogger(IdentificationServiceImpl.class);
 
     @Autowired
-    private IdentityOperationService identityOperationService;
+    private IdentityOperationService identityOperationServiceImpl;
 
     @Autowired
     private ContactRepository contactRepository;
 
     @Autowired
-    private ResponseService responseService;
+    private ResponseService responseServiceImpl;
 
     public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) {
             String email = contactModel.getEmail();
@@ -36,8 +39,8 @@ public class IdentificationService {
 
             if (contacts.isEmpty()) {
                 log.info("No contacts found for email: {} or phone number: {}", email, phoneNumber);
-                identityOperationService.createNewUser(email, phoneNumber);
-                return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
+                identityOperationServiceImpl.createNewUser(email, phoneNumber);
+                return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
             } else {
                 Contact contact = contactRepository.findByEmailAndPhoneNumber(email, phoneNumber);
 
@@ -52,10 +55,10 @@ public class IdentificationService {
 
                     if (fetchedViaEmail.isEmpty()) {
                         userExistViaPhoneNumber(email, fetchedViaPhoneNumber);
-                        return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
+                        return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
                     } else if (fetchedViaPhoneNumber.isEmpty()){
                         userExistViaEmail(phoneNumber, fetchedViaEmail);
-                        return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
+                        return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
                     }
 
                     else {
@@ -88,17 +91,17 @@ public class IdentificationService {
                             }
                         }
 
-                        return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
+                        return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
                     }
                 }
             }
         } catch (Exception e) {
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
         }
-        return responseService.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
+        return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
     }
 
-    public void userExistViaPhoneNumber(String email, List<Contact> fetchedViaPhoneNumber) {
+    private void userExistViaPhoneNumber(String email, List<Contact> fetchedViaPhoneNumber) {
         try {
             Contact primaryContact = null;
             Contact secondaryContact = new Contact();
@@ -132,7 +135,7 @@ public class IdentificationService {
         }
     }
 
-    public void userExistViaEmail(String phoneNumber, List<Contact> fetchedViaEmail) {
+    private void userExistViaEmail(String phoneNumber, List<Contact> fetchedViaEmail) {
         try {
             Contact primaryContact = null;
             Contact secondaryContact = new Contact();
@@ -168,7 +171,7 @@ public class IdentificationService {
 
     public ResponseContactInfoModel fetchContactInfoViaEmail(String email) {
         try{
-            return responseService.getContactViaEmail(email);
+            return responseServiceImpl.getContactViaEmail(email);
         }catch (Exception e){
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
             return null;
@@ -177,7 +180,7 @@ public class IdentificationService {
 
     public ResponseContactInfoModel fetchContactInfoViaPhoneNumber(String phoneNumber) {
         try{
-            return responseService.getContactViaPhoneNumber(phoneNumber);
+            return responseServiceImpl.getContactViaPhoneNumber(phoneNumber);
         }catch (Exception e){
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
             return null;

@@ -1,7 +1,7 @@
 package com.bitespeed.backendTask.controller;
 
 import com.bitespeed.backendTask.model.RequestContactInfoModel;
-import com.bitespeed.backendTask.service.impl.IdentificationService;
+import com.bitespeed.backendTask.service.IdentificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,35 @@ public class UserController {
 
     @Autowired
     private IdentificationService identificationService;
-
     @PostMapping("/identify")
+    public ResponseEntity<?> contactInfo(@RequestBody RequestContactInfoModel contactModel) {
+        String email = contactModel.getEmail();
+        String phoneNumber = contactModel.getPhoneNumber();
+
+            try {
+                if (email != null && phoneNumber != null) {
+                    log.info("Inside where both email and phone number exist");
+                    return ResponseEntity.ok(identificationService.fetchContactInfo(contactModel));
+                }
+
+                else if (email == null && phoneNumber != null) {
+                    log.info("Inside where email does not exist and phoneNumber exists");
+                    return ResponseEntity.ok(identificationService.fetchContactInfoViaPhoneNumber(phoneNumber));
+                }
+
+                else if (email != null && phoneNumber == null) {
+                    log.info("Inside where email exists and phoneNumber does not exist");
+                    return ResponseEntity.ok(identificationService.fetchContactInfoViaEmail(email));
+                }
+            } catch (Exception e) {
+                log.error("An error occurred while identifying user: {}", e.getMessage(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+            }
+        // If no conditions are met, return bad request
+        return ResponseEntity.badRequest().body("Invalid request parameters.");
+    }
+
+    @PostMapping("/identify1")
     public ResponseEntity<?> identifyUser(@RequestBody RequestContactInfoModel contactModel) {
         String email = contactModel.getEmail();
         String phoneNumber = contactModel.getPhoneNumber();
@@ -43,10 +70,14 @@ public class UserController {
             if (isValidEmail && isValidPhoneNumber) {
                 log.info("Inside where both email and phone number exist");
                 return ResponseEntity.ok(identificationService.fetchContactInfo(contactModel));
-            } else if (!isValidEmail && isValidPhoneNumber) {
+            }
+
+            else if (!isValidEmail && isValidPhoneNumber) {
                 log.info("Inside where email does not exist or is invalid and phoneNumber exists");
                 return ResponseEntity.badRequest().body("Invalid email format. Please provide a valid email.");
-            } else if (isValidEmail && !isValidPhoneNumber) {
+            }
+
+            else if (isValidEmail && !isValidPhoneNumber) {
                 log.info("Inside where email exists and phoneNumber does not exist or is invalid");
                 return ResponseEntity.badRequest().body("Invalid phone number format. Please provide a valid mobile phone number.");
             }

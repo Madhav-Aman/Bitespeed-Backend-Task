@@ -2,14 +2,14 @@ package com.bitespeed.backendTask.service.impl;
 
 import com.bitespeed.backendTask.entity.Contact;
 import com.bitespeed.backendTask.repository.ContactRepository;
+import com.bitespeed.backendTask.service.IdentityOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.*;
 
 @Service
-public class IdentityOperationService {
+public class IdentityOperationServiceImpl implements IdentityOperationService {
     Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ContactRepository contactRepository;
