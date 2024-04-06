@@ -1,18 +1,39 @@
 package com.bitespeed.backendTask.controller;
 
 import com.bitespeed.backendTask.model.RequestContactInfoModel;
+import com.bitespeed.backendTask.service.impl.IdentificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1")
 public class UserController {
+    Logger log = (Logger) LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping("/identify")
-    public ResponseEntity<?> identifyUser(@RequestBody RequestContactInfoModel contactModel){
+    @Autowired
+    private IdentificationService identificationService;
+
+
+
+
+    @PostMapping("/identify")
+    public ResponseEntity<?> identifyUser(@RequestBody RequestContactInfoModel contactModel) {
+        String email = contactModel.getEmail();
+        String phoneNumber = contactModel.getPhoneNumber();
+        try {
+            if(email !=null && phoneNumber != null){
+                log.info("Inside where both email and phone number exists");
+                return ResponseEntity.ok(identificationService.fetchContactInfo(email,phoneNumber));
+            }
+
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+        }
         return null;
     }
 

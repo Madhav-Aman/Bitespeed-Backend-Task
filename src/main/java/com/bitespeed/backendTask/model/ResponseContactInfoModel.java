@@ -8,12 +8,12 @@ import java.util.*;
 @Component
 public class ResponseContactInfoModel implements Serializable {
 
-    private int primaryContactId;
+    private Long primaryContactId;
     private List<String> emails;
     private List<String> phoneNumbers;
-    private List<Integer> secondaryContactIds;
+    private List<Long> secondaryContactIds;
 
-    public ResponseContactInfoModel(int primaryContactId, List<String> emails, List<String> phoneNumbers, List<Integer> secondaryContactIds) {
+    public ResponseContactInfoModel(Long primaryContactId, List<String> emails, List<String> phoneNumbers, List<Long> secondaryContactIds) {
         this.primaryContactId = primaryContactId;
         this.emails = emails;
         this.phoneNumbers = phoneNumbers;
@@ -23,11 +23,11 @@ public class ResponseContactInfoModel implements Serializable {
     public ResponseContactInfoModel() {
     }
 
-    public int getPrimaryContactId() {
+    public Long getPrimaryContactId() {
         return primaryContactId;
     }
 
-    public void setPrimaryContactId(int primaryContactId) {
+    public void setPrimaryContactId(Long primaryContactId) {
         this.primaryContactId = primaryContactId;
     }
 
@@ -47,11 +47,11 @@ public class ResponseContactInfoModel implements Serializable {
         this.phoneNumbers = phoneNumbers;
     }
 
-    public List<Integer> getSecondaryContactIds() {
+    public List<Long> getSecondaryContactIds() {
         return secondaryContactIds;
     }
 
-    public void setSecondaryContactIds(List<Integer> secondaryContactIds) {
+    public void setSecondaryContactIds(List<Long> secondaryContactIds) {
         this.secondaryContactIds = secondaryContactIds;
     }
 
