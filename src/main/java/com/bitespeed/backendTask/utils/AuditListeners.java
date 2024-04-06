@@ -20,6 +20,7 @@ public class AuditListeners {
             Contact contact = (Contact) target;
 
             contact.setCreatedAt(new Date());
+            contact.setUpdatedAt(new Date());
         }
     }
 

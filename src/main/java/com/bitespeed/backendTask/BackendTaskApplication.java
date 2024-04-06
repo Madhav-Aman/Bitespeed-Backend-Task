@@ -10,7 +10,7 @@ public class BackendTaskApplication {
 	public static void main(String[] args) {
 
 		ApplicationContext ctx = SpringApplication.run(BackendTaskApplication.class, args);
-//		ResponseService responseServices = ctx.getBean(ResponseService.class);
+//		ResponseServiceImpl responseServices = ctx.getBean(ResponseServiceImpl.class);
 //		System.out.println(responseServices.getContactInfo("madhav aman srivastava aditya khushi","1222"));
 	}
 
