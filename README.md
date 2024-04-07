@@ -37,3 +37,5 @@ Send a POST request to the endpoint with the appropriate JSON request format to 
 - Spring Boot
 - Spring Data JPA
 - SLF4J for logging
+- MysqlConnector
+  
