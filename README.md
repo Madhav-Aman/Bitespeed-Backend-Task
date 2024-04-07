@@ -38,4 +38,7 @@ Send a POST request to the endpoint with the appropriate JSON request format to 
 - Spring Data JPA
 - SLF4J for logging
 - MysqlConnector
+
+## Production Branch Name
+ The production branch is named deploy.
   
