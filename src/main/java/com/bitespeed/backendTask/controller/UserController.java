@@ -57,12 +57,12 @@ public class UserController {
         // This regex allows 10-digit phone numbers not starting with 0 or 1
 
         // Check if email is in a valid format
-        if (email != null && email.matches(emailRegex)) {
+        if (email == null || email.matches(emailRegex)) {
             isValidEmail = true;
         }
 
         // Check if phone number is in the format of a mobile number
-        if (phoneNumber != null && phoneNumber.matches(phoneRegex)) {
+        if (phoneNumber == null || phoneNumber.matches(phoneRegex)) {
             isValidPhoneNumber = true;
         }
 

@@ -49,13 +49,22 @@ public class IdentificationServiceImpl implements IdentificationService {
                     log.info("Contact found for email: {} and phone number: {}", email, phoneNumber);
 
                     List<Contact> fetchedViaEmail = contacts.stream()
-                            .filter(c -> contactModel.getEmail().equals(c.getEmail()))
+                            .filter(c -> {
+                                String modelEmail = contactModel.getEmail();
+                                return modelEmail != null && modelEmail.equals(c.getEmail());
+                            })
                             .collect(Collectors.toList());
+
                     log.info("Fetched contacts via email: {}", fetchedViaEmail);
 
                     List<Contact> fetchedViaPhoneNumber = contacts.stream()
-                            .filter(c -> contactModel.getPhoneNumber().equals(c.getPhoneNumber()))
+                            .filter(c -> {
+                                String modelPhoneNumber = contactModel.getPhoneNumber();
+                                return modelPhoneNumber != null && modelPhoneNumber.equals(c.getPhoneNumber());
+                            })
                             .collect(Collectors.toList());
+
+
                     log.info("Fetched contacts via phone number: {}", fetchedViaPhoneNumber);
 
                     if (fetchedViaEmail.isEmpty()) {
