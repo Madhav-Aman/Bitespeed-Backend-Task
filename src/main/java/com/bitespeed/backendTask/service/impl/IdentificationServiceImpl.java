@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class IdentificationServiceImpl implements IdentificationService {
@@ -34,7 +35,7 @@ public class IdentificationServiceImpl implements IdentificationService {
             String email = contactModel.getEmail();
             String phoneNumber = contactModel.getPhoneNumber();
         try {
-            log.info("Fetching contact information for email: {} and phone number: {}", email, phoneNumber);
+            log.info("Fgitetching contact information for email: {} and phone number: {}", email, phoneNumber);
             List<Contact> contacts = contactRepository.findByEmailOrPhoneNumber(email, phoneNumber);
 
             if (contacts.isEmpty()) {
@@ -47,10 +48,14 @@ public class IdentificationServiceImpl implements IdentificationService {
                 if (contact == null) {
                     log.info("Contact found for email: {} and phone number: {}", email, phoneNumber);
 
-                    List<Contact> fetchedViaEmail = contactRepository.findByEmail(email);
+                    List<Contact> fetchedViaEmail = contacts.stream()
+                            .filter(c -> contactModel.getEmail().equals(c.getEmail()))
+                            .collect(Collectors.toList());
                     log.info("Fetched contacts via email: {}", fetchedViaEmail);
 
-                    List<Contact> fetchedViaPhoneNumber = contactRepository.findByPhoneNumber(phoneNumber);
+                    List<Contact> fetchedViaPhoneNumber = contacts.stream()
+                            .filter(c -> contactModel.getPhoneNumber().equals(c.getPhoneNumber()))
+                            .collect(Collectors.toList());
                     log.info("Fetched contacts via phone number: {}", fetchedViaPhoneNumber);
 
                     if (fetchedViaEmail.isEmpty()) {
