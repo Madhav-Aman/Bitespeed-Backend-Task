@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ContactRepository extends JpaRepository<Contact,Long> {
@@ -21,8 +22,10 @@ public interface ContactRepository extends JpaRepository<Contact,Long> {
     List<Contact> findByPhoneNumber(String phoneNumber);
 
 
-    Contact findByEmailAndLinkPrecedence(String email,String precedence);
+    Optional<Contact> findByEmailAndLinkPrecedence(String email, String precedence);
     Contact findByPhoneNumberAndLinkPrecedence(String phoneNumber,String precedence);
+
+    List<Contact> findByLinkedId(Long id);
 
 
 }

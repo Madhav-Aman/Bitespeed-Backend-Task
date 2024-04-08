@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
@@ -93,58 +94,59 @@ public class ResponseServiceImpl implements ResponseService {
 
     public ResponseContactInfoModel getContactViaEmail(String email) {
         try {
+            Optional<Contact> primaryContact = contactRepository.findByEmailAndLinkPrecedence(email,"primary");
             ResponseContactInfoModel response = new ResponseContactInfoModel();
-            List<Contact> contacts = contactRepository.findByEmail(email);
+            List<String> emails = new ArrayList<>();
+            List<String> phoneNumbers = new ArrayList<>();
+            List<Long> secondaryIds = new ArrayList<>();
 
-            if (contacts.isEmpty()) {
-                // If no contacts found for the email, create a new primary contact
-                Contact contact = new Contact();
-                contact.setEmail(email);
-                contact.setLinkPrecedence("primary");
-                contactRepository.save(contact);
+            if(!primaryContact.isEmpty())
+            {
+                List<Contact> contacts = contactRepository.findByLinkedId(primaryContact.get().getId());
 
-                // Return contact information for the new primary contact
-                return getContactInfoViaEmailAndPhoneNumber(email, "");
-            } else {
-                List<String> emails = new ArrayList<>();
-                List<String> phoneNumbers = new ArrayList<>();
-                List<Long> secondaryIds = new ArrayList<>();
-
-                // Populate primary contact information
-                Contact primaryContact = contacts.stream()
-                        .filter(c -> "primary".equals(c.getLinkPrecedence()))
-                        .findFirst()
-                        .orElse(null);
-                if (primaryContact != null) {
-                    response.setPrimaryContactId(primaryContact.getId());
-                    emails.add(primaryContact.getEmail());
-                    phoneNumbers.add(primaryContact.getPhoneNumber());
+                emails.add(0,primaryContact.get().getEmail());
+                phoneNumbers.add(0,primaryContact.get().getPhoneNumber());
+                for (Contact c: contacts){
+                    emails.add(c.getEmail());
+                    phoneNumbers.add(c.getPhoneNumber());
+                    secondaryIds.add(c.getId());
                 }
 
-                // Populate secondary contact information
-                for (Contact c : contacts) {
-                    if (!"primary".equals(c.getLinkPrecedence())) {
+                response.setPrimaryContactId(primaryContact.get().getId());
+                response.setEmails(emails);
+                response.setPhoneNumbers(phoneNumbers);
+                response.setSecondaryContactIds(secondaryIds);
+                return response;
+            }else{
+                List<Contact> contacts = contactRepository.findByEmail(email);
+                if(!contacts.isEmpty()){
+                    Long linkedId = contacts.get(0).getLinkedId();
+
+                    Contact primary = contactRepository.findById(linkedId).get();
+
+                    emails.add(0,primary.getEmail());
+                    phoneNumbers.add(0,primary.getPhoneNumber());
+                    for (Contact c: contacts){
                         emails.add(c.getEmail());
                         phoneNumbers.add(c.getPhoneNumber());
                         secondaryIds.add(c.getId());
                     }
+                    response.setPrimaryContactId(primary.getId());
+                    response.setEmails(emails);
+                    response.setPhoneNumbers(phoneNumbers);
+                    response.setSecondaryContactIds(secondaryIds);
+
                 }
-
-                // Set the lists in the response model
-                response.setEmails(emails);
-                response.setPhoneNumbers(phoneNumbers);
-                response.setSecondaryContactIds(secondaryIds);
-
-                // Log debug level message indicating successful completion of contact information fetching
-                log.debug("Contact information fetched successfully");
-
                 return response;
             }
+
+
         } catch (Exception e) {
             // Log error level message if an exception occurs during the execution of the method
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
             return null;
         }
+
     }
 
 
