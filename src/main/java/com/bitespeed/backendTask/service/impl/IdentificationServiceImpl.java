@@ -103,6 +103,35 @@ public class IdentificationServiceImpl implements IdentificationService {
                                 p1.setLinkPrecedence("secondary");
                                 contactRepository.save(p1);
                             }
+                        }else if(!optionalP1.isPresent() && !optionalP2.isPresent()){
+                            Optional<Contact> optionalp1 = fetchedViaEmail.stream()
+                                    .filter(c -> "secondary".equals(c.getLinkPrecedence()))
+                                    .findFirst();
+
+                            Optional<Contact> optionalp2 = fetchedViaPhoneNumber.stream()
+                                    .filter(c -> "secondary".equals(c.getLinkPrecedence()))
+                                    .findFirst();
+
+
+                            if(optionalp1.isPresent() && optionalp2.isPresent()){
+                                Contact p1 = optionalP1.get();
+                                Contact p2 = optionalP2.get();
+
+                                // Compare createdAt dates
+                                if (p1.getCreatedAt().before(p2.getCreatedAt())) {
+                                    // Set the new contact's linked ID to the old contact's linked ID
+                                    contact.setLinkedId(p1.getId());
+                                } else {
+                                    // Set the new contact's linked ID to the old contact's linked ID
+                                    contact.setLinkedId(p2.getId());
+                                }
+
+                                // Mark the new contact as secondary
+                                contact.setLinkPrecedence("secondary");
+                                contactRepository.save(contact);
+                            }
+
+
                         }
 
                         return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);

@@ -167,6 +167,7 @@ public class ResponseServiceImpl implements ResponseService {
 
 
 
+
     public ResponseContactInfoModel getContactViaPhoneNumber(String phoneNumber){
         try{
             Optional<Contact> primaryContact = contactRepository.findByPhoneNumberAndLinkPrecedence(phoneNumber,"primary");
