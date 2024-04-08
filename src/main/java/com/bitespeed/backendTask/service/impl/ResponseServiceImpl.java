@@ -10,9 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.*;
 @Service
 public class ResponseServiceImpl implements ResponseService {
 
@@ -121,12 +122,19 @@ public class ResponseServiceImpl implements ResponseService {
                 return response;
             }else{
                 log.info("primary contact is empty : {}");
+                Set<Contact> contactSet = new HashSet<>();
+
+
                 List<Contact> contacts = contactRepository.findByEmail(email);
                 log.info("findByEmail: {}",contacts);
-                if(!contacts.isEmpty()){
                     Long linkedId = contacts.get(0).getLinkedId();
 
                     Contact primary = contactRepository.findById(linkedId).get();
+                    contactSet.add(primary);
+                    List<Contact> secondaryConnection = contactRepository.findByEmailOrPhoneNumber(primary.getEmail(), primary.getPhoneNumber());
+                    for(Contact c: secondaryConnection){
+                        contactSet.add(c);
+                    }
 
                     emails.add(0,primary.getEmail());
                     phoneNumbers.add(0,primary.getPhoneNumber());
@@ -140,7 +148,7 @@ public class ResponseServiceImpl implements ResponseService {
                     response.setPhoneNumbers(phoneNumbers);
                     response.setSecondaryContactIds(secondaryIds);
 
-                }
+
                 return response;
             }
 
@@ -181,29 +189,38 @@ public class ResponseServiceImpl implements ResponseService {
                 response.setPhoneNumbers(phoneNumbers);
                 response.setSecondaryContactIds(secondaryIds);
                 return response;
-            }else{
+            }else {
                 log.info("primary contact is empty : {}");
+                Set<Contact> contactSet = new HashSet<>();
+
+
                 List<Contact> contacts = contactRepository.findByPhoneNumber(phoneNumber);
-                log.info("findByEmail: {}",contacts);
-                if(!contacts.isEmpty()){
-                    Long linkedId = contacts.get(0).getLinkedId();
+                log.info("findByphoneNumber: {}", contacts);
+                Long linkedId = contacts.get(0).getLinkedId();
 
-                    Contact primary = contactRepository.findById(linkedId).get();
-
-                    emails.add(0,primary.getEmail());
-                    phoneNumbers.add(0,primary.getPhoneNumber());
-                    for (Contact c: contacts){
-                        emails.add(c.getEmail());
-                        phoneNumbers.add(c.getPhoneNumber());
-                        secondaryIds.add(c.getId());
-                    }
-                    response.setPrimaryContactId(primary.getId());
-                    response.setEmails(emails);
-                    response.setPhoneNumbers(phoneNumbers);
-                    response.setSecondaryContactIds(secondaryIds);
-
+                Contact primary = contactRepository.findById(linkedId).get();
+                contactSet.add(primary);
+                List<Contact> secondaryConnection = contactRepository.findByEmailOrPhoneNumber(primary.getEmail(), primary.getPhoneNumber());
+                for (Contact c : secondaryConnection) {
+                    contactSet.add(c);
                 }
+
+                emails.add(0, primary.getEmail());
+                phoneNumbers.add(0, primary.getPhoneNumber());
+                for (Contact c : contacts) {
+                    emails.add(c.getEmail());
+                    phoneNumbers.add(c.getPhoneNumber());
+                    secondaryIds.add(c.getId());
+                }
+                response.setPrimaryContactId(primary.getId());
+                response.setEmails(emails);
+                response.setPhoneNumbers(phoneNumbers);
+                response.setSecondaryContactIds(secondaryIds);
+
+
                 return response;
+
+
             }
 
         } catch (Exception e) {
