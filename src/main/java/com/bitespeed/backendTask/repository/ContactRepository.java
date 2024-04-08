@@ -23,7 +23,7 @@ public interface ContactRepository extends JpaRepository<Contact,Long> {
 
 
     Optional<Contact> findByEmailAndLinkPrecedence(String email, String precedence);
-    Contact findByPhoneNumberAndLinkPrecedence(String phoneNumber,String precedence);
+    Optional<Contact> findByPhoneNumberAndLinkPrecedence(String phoneNumber,String precedence);
 
     List<Contact> findByLinkedId(Long id);
 
