@@ -17,6 +17,7 @@ public class UserController {
 
     @Autowired
     private IdentificationService identificationService;
+
     @PostMapping("/identify")
     public ResponseEntity<?> contactInfo(@RequestBody RequestContactInfoModel contactModel) {
         String email = contactModel.getEmail();
@@ -30,7 +31,7 @@ public class UserController {
 
                 else if (email == null && phoneNumber != null) {
                     log.info("Inside where email does not exist and phoneNumber exists");
-                    ResponseContactInfoModel contactInfo = identificationService.getContactViaPhoneNumber(phoneNumber);
+                    ResponseContactInfoModel contactInfo = identificationService.fetchContactInfoViaPhoneNumber(phoneNumber);
                     if (contactInfo != null) {
                         return ResponseEntity.ok(contactInfo);
                     } else {
