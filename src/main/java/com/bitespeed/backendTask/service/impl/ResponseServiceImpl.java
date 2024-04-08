@@ -124,7 +124,6 @@ public class ResponseServiceImpl implements ResponseService {
                 log.info("primary contact is empty : {}");
                 Set<Contact> contactSet = new HashSet<>();
 
-
                 List<Contact> contacts = contactRepository.findByEmail(email);
                 log.info("findByEmail: {}",contacts);
                 if(!contacts.isEmpty()) {
@@ -157,14 +156,15 @@ public class ResponseServiceImpl implements ResponseService {
                 return null;
             }
 
-
-
         } catch (Exception e) {
             // Log error level message if an exception occurs during the execution of the method
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
             return null;
         }
+    
     }
+
+
 
 
     public ResponseContactInfoModel getContactViaPhoneNumber(String phoneNumber){
