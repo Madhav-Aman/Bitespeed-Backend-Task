@@ -95,21 +95,19 @@ public class ResponseServiceImpl implements ResponseService {
 
     public ResponseContactInfoModel getContactViaEmail(String email) {
         try {
-            Optional<Contact> primaryContact = contactRepository.findByEmailAndLinkPrecedence(email,"primary");
+            Optional<Contact> primaryContact = contactRepository.findByEmailAndLinkPrecedence(email, "primary");
             ResponseContactInfoModel response = new ResponseContactInfoModel();
             List<String> emails = new ArrayList<>();
             List<String> phoneNumbers = new ArrayList<>();
             List<Long> secondaryIds = new ArrayList<>();
 
-
-            if(!primaryContact.isEmpty())
-            {
+            if (!primaryContact.isEmpty()) {
                 log.info("primary contact is not empty : {}", primaryContact);
                 List<Contact> contacts = contactRepository.findByLinkedId(primaryContact.get().getId());
-                log.info("findByLinked : {}",contacts);
-                emails.add(0,primaryContact.get().getEmail());
-                phoneNumbers.add(0,primaryContact.get().getPhoneNumber());
-                for (Contact c: contacts){
+                log.info("findByLinked : {}", contacts);
+                emails.add(0, primaryContact.get().getEmail());
+                phoneNumbers.add(0, primaryContact.get().getPhoneNumber());
+                for (Contact c : contacts) {
                     emails.add(c.getEmail());
                     phoneNumbers.add(c.getPhoneNumber());
                     secondaryIds.add(c.getId());
@@ -120,67 +118,66 @@ public class ResponseServiceImpl implements ResponseService {
                 response.setPhoneNumbers(phoneNumbers);
                 response.setSecondaryContactIds(secondaryIds);
                 return response;
-            }else{
+            } else {
                 log.info("primary contact is empty : {}");
-                Set<Contact> contactSet = new HashSet<>();
-
 
                 List<Contact> contacts = contactRepository.findByEmail(email);
-                log.info("findByEmail: {}",contacts);
+                log.info("findByEmail: {}", contacts);
+
+                if (!contacts.isEmpty()) {
                     Long linkedId = contacts.get(0).getLinkedId();
+                    if (linkedId != null) {
+                        Contact primary = contactRepository.findById(linkedId).orElse(null);
+                        if (primary != null) {
+                            Set<Contact> contactSet = new HashSet<>();
+                            contactSet.add(primary);
+                            List<Contact> secondaryConnection = contactRepository.findByLinkedId(primary.getId());
+                            contactSet.addAll(secondaryConnection);
 
-                    Contact primary = contactRepository.findById(linkedId).get();
-                    contactSet.add(primary);
-                    List<Contact> secondaryConnection = contactRepository.findByLinkedId(primary.getId());
-                    for(Contact c: secondaryConnection){
-                        contactSet.add(c);
-                    }
-
-                    emails.add(0,primary.getEmail());
-                    phoneNumbers.add(0,primary.getPhoneNumber());
-                    for (Contact c: contactSet){
-                        if(c.getLinkedId()!=null) {
-                            emails.add(c.getEmail());
-                            phoneNumbers.add(c.getPhoneNumber());
-                            secondaryIds.add(c.getId());
+                            for (Contact c : contactSet) {
+                                if (c.getLinkedId() != null) {
+                                    emails.add(c.getEmail());
+                                    phoneNumbers.add(c.getPhoneNumber());
+                                    secondaryIds.add(c.getId());
+                                }
+                            }
+                            response.setPrimaryContactId(primary.getId());
+                            response.setEmails(emails);
+                            response.setPhoneNumbers(phoneNumbers);
+                            response.setSecondaryContactIds(secondaryIds);
+                            return response;
                         }
                     }
-                    response.setPrimaryContactId(primary.getId());
-                    response.setEmails(emails);
-                    response.setPhoneNumbers(phoneNumbers);
-                    response.setSecondaryContactIds(secondaryIds);
+                }
 
-
-                return response;
+                // Handle case where no contacts are found for the email or primary contact is null
+                log.warn("No contacts found for email: {}", email);
+                return null; // or return another default response as needed
             }
-
-
         } catch (Exception e) {
             // Log error level message if an exception occurs during the execution of the method
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
             return null;
         }
-
     }
 
 
-    public ResponseContactInfoModel getContactViaPhoneNumber(String phoneNumber){
-        try{
-            Optional<Contact> primaryContact = contactRepository.findByPhoneNumberAndLinkPrecedence(phoneNumber,"primary");
+
+    public ResponseContactInfoModel getContactViaPhoneNumber(String phoneNumber) {
+        try {
+            Optional<Contact> primaryContact = contactRepository.findByPhoneNumberAndLinkPrecedence(phoneNumber, "primary");
             ResponseContactInfoModel response = new ResponseContactInfoModel();
             List<String> emails = new ArrayList<>();
             List<String> phoneNumbers = new ArrayList<>();
             List<Long> secondaryIds = new ArrayList<>();
 
-
-            if(!primaryContact.isEmpty())
-            {
+            if (!primaryContact.isEmpty()) {
                 log.info("primary contact is not empty : {}", primaryContact);
                 List<Contact> contacts = contactRepository.findByLinkedId(primaryContact.get().getId());
-                log.info("findByLinked : {}",contacts);
-                emails.add(0,primaryContact.get().getEmail());
-                phoneNumbers.add(0,primaryContact.get().getPhoneNumber());
-                for (Contact c: contacts){
+                log.info("findByLinked : {}", contacts);
+                emails.add(0, primaryContact.get().getEmail());
+                phoneNumbers.add(0, primaryContact.get().getPhoneNumber());
+                for (Contact c : contacts) {
                     emails.add(c.getEmail());
                     phoneNumbers.add(c.getPhoneNumber());
                     secondaryIds.add(c.getId());
@@ -191,46 +188,47 @@ public class ResponseServiceImpl implements ResponseService {
                 response.setPhoneNumbers(phoneNumbers);
                 response.setSecondaryContactIds(secondaryIds);
                 return response;
-            }else {
+            } else {
                 log.info("primary contact is empty : {}");
                 Set<Contact> contactSet = new HashSet<>();
-
 
                 List<Contact> contacts = contactRepository.findByPhoneNumber(phoneNumber);
                 log.info("findByphoneNumber: {}", contacts);
-                Long linkedId = contacts.get(0).getLinkedId();
 
-                Contact primary = contactRepository.findById(linkedId).get();
-                contactSet.add(primary);
-                List<Contact> secondaryConnection = contactRepository.findByLinkedId(primary.getId());
-                for (Contact c : secondaryConnection) {
-                    contactSet.add(c);
-                }
+                if (!contacts.isEmpty()) {
+                    Long linkedId = contacts.get(0).getLinkedId();
+                    if (linkedId != null) {
+                        Contact primary = contactRepository.findById(linkedId).orElse(null);
+                        if (primary != null) {
+                            contactSet.add(primary);
+                            List<Contact> secondaryConnection = contactRepository.findByLinkedId(primary.getId());
+                            contactSet.addAll(secondaryConnection);
 
-                emails.add(0, primary.getEmail());
-                phoneNumbers.add(0, primary.getPhoneNumber());
-                for (Contact c : contactSet) {
-                    if(c.getLinkedId() != null) {
-                        emails.add(c.getEmail());
-                        phoneNumbers.add(c.getPhoneNumber());
-                        secondaryIds.add(c.getId());
+                            for (Contact c : contactSet) {
+                                if (c.getLinkedId() != null) {
+                                    emails.add(c.getEmail());
+                                    phoneNumbers.add(c.getPhoneNumber());
+                                    secondaryIds.add(c.getId());
+                                }
+                            }
+                            response.setPrimaryContactId(primary.getId());
+                            response.setEmails(emails);
+                            response.setPhoneNumbers(phoneNumbers);
+                            response.setSecondaryContactIds(secondaryIds);
+                            return response;
+                        }
                     }
                 }
-                response.setPrimaryContactId(primary.getId());
-                response.setEmails(emails);
-                response.setPhoneNumbers(phoneNumbers);
-                response.setSecondaryContactIds(secondaryIds);
 
-
-                return response;
-
-
+                // Handle case where no contacts are found for the phone number or primary contact is null
+                log.warn("No contacts found for phone number: {}", phoneNumber);
+                return null; // or return another default response as needed
             }
-
         } catch (Exception e) {
             // Log error level message if an exception occurs during the execution of the method
             log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
             return null;
         }
     }
+
 }
