@@ -138,7 +138,7 @@ public class ResponseServiceImpl implements ResponseService {
 
                     emails.add(0,primary.getEmail());
                     phoneNumbers.add(0,primary.getPhoneNumber());
-                    for (Contact c: contacts){
+                    for (Contact c: contactSet){
                         emails.add(c.getEmail());
                         phoneNumbers.add(c.getPhoneNumber());
                         secondaryIds.add(c.getId());
@@ -207,7 +207,7 @@ public class ResponseServiceImpl implements ResponseService {
 
                 emails.add(0, primary.getEmail());
                 phoneNumbers.add(0, primary.getPhoneNumber());
-                for (Contact c : contacts) {
+                for (Contact c : contactSet) {
                     emails.add(c.getEmail());
                     phoneNumbers.add(c.getPhoneNumber());
                     secondaryIds.add(c.getId());
