@@ -31,11 +31,11 @@ public class IdentificationServiceImpl implements IdentificationService {
     @Autowired
     private ResponseService responseServiceImpl;
 
-    public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) {
-            String email = contactModel.getEmail();
-            String phoneNumber = contactModel.getPhoneNumber();
+    public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) {
+        String email = contactModel.getEmail();
+        String phoneNumber = contactModel.getPhoneNumber();
         try {
-            log.info("Fgitetching contact information for email: {} and phone number: {}", email, phoneNumber);
+            log.info("Fetching contact information for email: {} and phone number: {}", email, phoneNumber);
             List<Contact> contacts = contactRepository.findByEmailOrPhoneNumber(email, phoneNumber);
 
             if (contacts.isEmpty()) {
@@ -46,7 +46,7 @@ public class IdentificationServiceImpl implements IdentificationService {
                 Contact contact = contactRepository.findByEmailAndPhoneNumber(email, phoneNumber);
 
                 if (contact == null) {
-                    log.info("Contact found for email: {} and phone number: {}", email, phoneNumber);
+                    log.info("Contact not found for email: {} and phone number: {}", email, phoneNumber);
 
                     List<Contact> fetchedViaEmail = contacts.stream()
                             .filter(c -> {
@@ -114,8 +114,8 @@ public class IdentificationServiceImpl implements IdentificationService {
 
 
                             if(optionalp1.isPresent() && optionalp2.isPresent()){
-                                Contact p1 = optionalP1.get();
-                                Contact p2 = optionalP2.get();
+                                Contact p1 = optionalp1.get();
+                                Contact p2 = optionalp2.get();
 
                                 // Compare createdAt dates
                                 if (p1.getCreatedAt().before(p2.getCreatedAt())) {
@@ -143,6 +143,7 @@ public class IdentificationServiceImpl implements IdentificationService {
         }
         return responseServiceImpl.getContactInfoViaEmailAndPhoneNumber(email, phoneNumber);
     }
+
 
     private void userExistViaPhoneNumber(String email, List<Contact> fetchedViaPhoneNumber) {
         try {
