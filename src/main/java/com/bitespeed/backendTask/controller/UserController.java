@@ -1,6 +1,7 @@
 package com.bitespeed.backendTask.controller;
 
 import com.bitespeed.backendTask.model.RequestContactInfoModel;
+import com.bitespeed.backendTask.model.ResponseContactInfoModel;
 import com.bitespeed.backendTask.service.IdentificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,25 @@ public class UserController {
 
                 else if (email == null && phoneNumber != null) {
                     log.info("Inside where email does not exist and phoneNumber exists");
-                    return ResponseEntity.ok(identificationService.fetchContactInfoViaPhoneNumber(phoneNumber));
+                    ResponseContactInfoModel contactInfo = identificationService.getContactViaPhoneNumber(phoneNumber);
+                    if (contactInfo != null) {
+                        return ResponseEntity.ok(contactInfo);
+                    } else {
+                        // Return response indicating that the user doesn't exist via phone number
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User doesn't exist via phone number");
+                    }
                 }
+
 
                 else if (email != null && phoneNumber == null) {
                     log.info("Inside where email exists and phoneNumber does not exist");
-                    return ResponseEntity.ok(identificationService.fetchContactInfoViaEmail(email));
+                    ResponseContactInfoModel contactInfo = identificationService.fetchContactInfoViaEmail(email);
+                    if (contactInfo != null) {
+                        return ResponseEntity.ok(contactInfo);
+                    } else {
+                        // Return response indicating that the user doesn't exist via email
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User doesn't exist via email");
+                    }
                 }
             } catch (Exception e) {
                 log.error("An error occurred while identifying user: {}", e.getMessage(), e);
