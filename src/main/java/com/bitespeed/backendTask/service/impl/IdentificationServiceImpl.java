@@ -31,7 +31,7 @@ public class IdentificationServiceImpl implements IdentificationService {
     @Autowired
     private ResponseService responseServiceImpl;
 
-    public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) {
+     public ResponseContactInfoModel fetchContactInfo(RequestContactInfoModel contactModel) {
         String email = contactModel.getEmail();
         String phoneNumber = contactModel.getPhoneNumber();
         try {
