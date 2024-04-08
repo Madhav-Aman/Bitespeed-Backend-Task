@@ -131,7 +131,7 @@ public class ResponseServiceImpl implements ResponseService {
 
                     Contact primary = contactRepository.findById(linkedId).get();
                     contactSet.add(primary);
-                    List<Contact> secondaryConnection = contactRepository.findByEmailOrPhoneNumber(primary.getEmail(), primary.getPhoneNumber());
+                    List<Contact> secondaryConnection = contactRepository.findByLinkedId(primary.getId());
                     for(Contact c: secondaryConnection){
                         contactSet.add(c);
                     }
@@ -139,9 +139,11 @@ public class ResponseServiceImpl implements ResponseService {
                     emails.add(0,primary.getEmail());
                     phoneNumbers.add(0,primary.getPhoneNumber());
                     for (Contact c: contactSet){
-                        emails.add(c.getEmail());
-                        phoneNumbers.add(c.getPhoneNumber());
-                        secondaryIds.add(c.getId());
+                        if(c.getLinkedId()!=null) {
+                            emails.add(c.getEmail());
+                            phoneNumbers.add(c.getPhoneNumber());
+                            secondaryIds.add(c.getId());
+                        }
                     }
                     response.setPrimaryContactId(primary.getId());
                     response.setEmails(emails);
@@ -200,7 +202,7 @@ public class ResponseServiceImpl implements ResponseService {
 
                 Contact primary = contactRepository.findById(linkedId).get();
                 contactSet.add(primary);
-                List<Contact> secondaryConnection = contactRepository.findByEmailOrPhoneNumber(primary.getEmail(), primary.getPhoneNumber());
+                List<Contact> secondaryConnection = contactRepository.findByLinkedId(primary.getId());
                 for (Contact c : secondaryConnection) {
                     contactSet.add(c);
                 }
@@ -208,9 +210,11 @@ public class ResponseServiceImpl implements ResponseService {
                 emails.add(0, primary.getEmail());
                 phoneNumbers.add(0, primary.getPhoneNumber());
                 for (Contact c : contactSet) {
-                    emails.add(c.getEmail());
-                    phoneNumbers.add(c.getPhoneNumber());
-                    secondaryIds.add(c.getId());
+                    if(c.getLinkedId() != null) {
+                        emails.add(c.getEmail());
+                        phoneNumbers.add(c.getPhoneNumber());
+                        secondaryIds.add(c.getId());
+                    }
                 }
                 response.setPrimaryContactId(primary.getId());
                 response.setEmails(emails);
