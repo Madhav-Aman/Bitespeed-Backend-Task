@@ -91,48 +91,34 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
 
-    public ResponseContactInfoModel getContactViaEmail(String email){
+    public ResponseContactInfoModel getContactViaEmail(String email) {
         try {
             ResponseContactInfoModel response = new ResponseContactInfoModel();
             List<Contact> contacts = contactRepository.findByEmail(email);
 
             if (contacts.isEmpty()) {
-
+                // If no contacts found for the email, create a new primary contact
                 Contact contact = new Contact();
                 contact.setEmail(email);
                 contact.setLinkPrecedence("primary");
                 contactRepository.save(contact);
 
-
-                return getContactInfoViaEmailAndPhoneNumber(email,"");
-
-            } else if (contacts.size() ==1 ) {
-                Contact c = contacts.get(0);
-                return getContactInfoViaEmailAndPhoneNumber(c.getEmail(),c.getPhoneNumber());
+                // Return contact information for the new primary contact
+                return getContactInfoViaEmailAndPhoneNumber(email, "");
             } else {
                 List<String> emails = new ArrayList<>();
                 List<String> phoneNumbers = new ArrayList<>();
                 List<Long> secondaryIds = new ArrayList<>();
 
+                // Populate primary contact information
                 Contact primaryContact = contacts.stream()
                         .filter(c -> "primary".equals(c.getLinkPrecedence()))
                         .findFirst()
                         .orElse(null);
-                Long linkedId = null;
-                if (primaryContact == null && !contacts.isEmpty()) {
-                    // If primary contact is null, take any contact from the list and assign its linked ID as primary contact ID
-                    for (Contact c : contacts) {
-                        if (c.getLinkedId() != null) {
-                            response.setPrimaryContactId(c.getLinkedId());
-                            linkedId = c.getLinkedId();
-                            break;
-                        }
-                    }
-                } else if (primaryContact != null) {
-                    // If primary contact is found, populate its information
+                if (primaryContact != null) {
                     response.setPrimaryContactId(primaryContact.getId());
-                    emails.add(0, primaryContact.getEmail());
-                    phoneNumbers.add(0, primaryContact.getPhoneNumber());
+                    emails.add(primaryContact.getEmail());
+                    phoneNumbers.add(primaryContact.getPhoneNumber());
                 }
 
                 // Populate secondary contact information
@@ -144,44 +130,21 @@ public class ResponseServiceImpl implements ResponseService {
                     }
                 }
 
-                if (linkedId != null) {
-                    primaryContact = contactRepository.findById(linkedId).orElse(null);
-                    if (primaryContact != null) {
-                        // Populate primary contact information when retrieved via linked ID
-                        emails.add(primaryContact.getEmail());
-                        phoneNumbers.add(primaryContact.getPhoneNumber());
-                        response.setPrimaryContactId(primaryContact.getId()); // Set primary contact ID
-                    } else {
-                        log.warn("Primary contact with ID {} not found", linkedId);
-                    }
-                } else {
-                    log.warn("Linked ID is null, unable to retrieve primary contact details");
-                }
-
-// Add emails and phone numbers of secondary contacts
-                for (Contact c : contacts) {
-                    if (!c.getId().equals(response.getPrimaryContactId())) { // Exclude primary contact
-                        emails.add(c.getEmail());
-                        phoneNumbers.add(c.getPhoneNumber());
-                        secondaryIds.add(c.getId());
-                    }
-                }
-
-// Set the lists in the response model
+                // Set the lists in the response model
                 response.setEmails(emails);
                 response.setPhoneNumbers(phoneNumbers);
                 response.setSecondaryContactIds(secondaryIds);
 
-// Log debug level message indicating successful completion of contact information fetching
+                // Log debug level message indicating successful completion of contact information fetching
                 log.debug("Contact information fetched successfully");
 
                 return response;
-            }} catch(Exception e){
-                // Log error level message if an exception occurs during the execution of the method
-                log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
-                return null;
             }
-
+        } catch (Exception e) {
+            // Log error level message if an exception occurs during the execution of the method
+            log.error("An error occurred while fetching contact information: {}", e.getMessage(), e);
+            return null;
+        }
     }
 
 
